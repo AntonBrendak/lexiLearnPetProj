@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 const userSchema = new mongoose.Schema({
-  language: { type: String, enum: ['en','uk','ru'], default: 'en' },
+  language: { type: String, enum: ['en','uk','ru'], default: 'uk' },
   knownWords: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Word' }],
   languageLevel: Number, rank: Number,
   email: { type: String, required: true, unique: true },
@@ -21,7 +21,5 @@ const userSchema = new mongoose.Schema({
     theme: { type: String, default: 'light' },
     notifications: { type: Boolean, default: true }
   },
-  resetPasswordToken: { type: String, default: '' },
-  resetPasswordExpires: { type: Date, default: Date.now, expires: 3600 },
 }, { timestamps: true });
 export default mongoose.model('User', userSchema);

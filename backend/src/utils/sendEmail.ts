@@ -4,16 +4,17 @@ import nodemailer from 'nodemailer';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173'; // заміни на свій
 const FROM_EMAIL = process.env.MAIL_USER || 'noreply@example.com';
 
+ const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
 export async function sendConfirmationEmail(email: string, token: string) {
   const confirmUrl = `${FRONTEND_URL}/confirm?token=${token}`;
-
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: FROM_EMAIL,
-      pass: process.env.MAIL_PASS
-    }
-  });
 
   await transporter.sendMail({
     from: `"LexiLearn" <${FROM_EMAIL}>`,
@@ -26,16 +27,9 @@ export async function sendConfirmationEmail(email: string, token: string) {
 
 export const sendResetPasswordEmail = async (to: string, token: string) => {
   const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-
-  const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
-
+  if (!link) {
+    throw new Error('Reset password link is not defined');
+  }
   await transporter.sendMail({
     from: process.env.EMAIL_FROM,
     to,

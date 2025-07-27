@@ -7,12 +7,22 @@ interface User {
   nickname: string;
   role: string;
   language: string;
+  knownWords: string[];
+  learnedWordsCount: number;
+  languageLevel: number;
+  rank: number;
+  avatarUrl: string;
 }
 
 interface AuthContextProps {
   user: User | null;
   login: (identifier: string, password: string) => Promise<void>;
-  register: (email: string, nickname: string, password: string, language: string) => Promise<void>;
+  register: (
+  email: string,
+  nickname: string,
+  password: string,
+  language: string
+  ) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
 }
 
@@ -41,10 +51,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (identifier: string, password: string) => {
-    const res = await axios.post('/api/auth/login', { identifier, password });
-    localStorage.setItem('refreshToken', res.data.refreshToken);
-    const meRes = await axios.get('/api/auth/me');
-    setUser(meRes.data.user);
+    try {
+      const res = await axios.post('/api/auth/login', { identifier, password });
+      localStorage.setItem('refreshToken', res.data.refreshToken);
+      const meRes = await axios.get('/api/auth/me');
+      setUser(meRes.data.user);
+      return { success: true };
+    } catch (err: any) {
+      // дістати повідомлення з response.data.message
+      const message = err.response?.data?.message || err.message || 'Login failed';
+      console.log('❌ Login error:', message);
+      return { success: false, message };
+    }
   };
 
     const register = async (email: string, nickname: string, password: string, language: string) => {

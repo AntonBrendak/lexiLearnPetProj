@@ -11,7 +11,7 @@ export default function RegisterPage() {
 
  const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
-  const result = await register(email, nickname, password, 'ua'); // Assuming 'ua' is the default language
+  const result = await register(email, nickname, password, 'uk'); // Assuming 'uk' is the default language
 
   if (result && result.success) {
     alert('Check your email for confirmation link');

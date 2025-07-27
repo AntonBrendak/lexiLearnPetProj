@@ -16,7 +16,7 @@ import {
   requestPasswordReset,
   resetPassword
 } from './controllers/auth.controller';
-import { WordsController } from './controllers/WordsController';
+import { generate, getRepeatWords, getDictationWords, getLibraryWords } from './controllers/WordsController';
 import { ChatController }  from './controllers/ChatController';
 import { TTSController }   from './controllers/TTSController';
 import { UserController }  from './controllers/UserController';
@@ -79,10 +79,14 @@ app.get    ('/api/auth/google/callback',
 // ———————————————————————————————
 // Protected API routes
 // ———————————————————————————————
-app.post   ('/api/words/generate',             authMiddleware, WordsController.generate as RequestHandler);
+app.post   ('/api/words/generate',             authMiddleware, generate as RequestHandler);
 app.post   ('/api/dialogue',                   authMiddleware, ChatController.sendMessage as RequestHandler);
 app.post   ('/api/tts',                        authMiddleware, TTSController.speak as RequestHandler);
 app.get    ('/api/user/profile',               authMiddleware, UserController.getMe as RequestHandler);
+app.get    ('/api/words/library',               authMiddleware, getLibraryWords as RequestHandler);
+app.get    ('/api/words/repeat',         authMiddleware, getRepeatWords as RequestHandler);
+app.get    ('/api/words/dictation',     authMiddleware, getDictationWords as RequestHandler);
+
 app.patch  ('/api/user/language',              authMiddleware, UserController.updateLanguage as RequestHandler);
 
 // ———————————————————————————————

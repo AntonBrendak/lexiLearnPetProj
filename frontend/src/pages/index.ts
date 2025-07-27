@@ -1,0 +1,11 @@
+export { default as HomePage } from './HomePage';
+export { default as LoginPage } from './LoginPage';
+export { default as RegisterPage } from './RegisterPage';
+export { default as ForgotPasswordPage } from './ForgotPasswordPage';
+export { default as ResetPasswordPage } from './ResetPasswordPage';
+export { default as ConfirmPage } from './ConfirmPage';
+export { default as ProfilePage } from './ProfilePage';
+export { default as LibraryPage } from './LibraryPage';
+export { default as RepeatPage } from './RepeatPage';
+export { default as DictationPage } from './DictationPage';
+export { default as TodayPage } from './TodayPage';

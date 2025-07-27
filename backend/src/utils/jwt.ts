@@ -16,7 +16,7 @@ export function generateTokens(user: any) {
     role: user.role
   };
 
-  const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+  const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: '2h' });
   const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, { expiresIn: '30d' });
 
   return { accessToken, refreshToken };

@@ -11,12 +11,17 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(identifier, password);
-      navigate('/');
-    } catch (err) {
-      console.error(err);
-      alert('Login failed');
-    }
+      const result = await login(identifier, password);
+      if (result.success) {
+        navigate('/');
+      } else {
+        // Показываем сообщение из response.data.message
+        alert(result.message);
+      }
+  } catch (err) {
+    console.error(err);
+    alert('Login failed');
+  }
   };
 
   const handleGoogle = () => {

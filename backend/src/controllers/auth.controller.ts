@@ -5,12 +5,13 @@ import User from '../models/User';
 import { sendConfirmationEmail, sendResetPasswordEmail } from '../utils/sendEmail';
 import { generateTokens, verifyRefreshToken } from '../utils/jwt';
 import { AuthRequest } from '../types/AuthRequest';
+import ResetToken from '../models/ResetToken';
 import dotenv from 'dotenv';
 dotenv.config();
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { email, nickname, password, language = 'en' } = req.body;
+    const { email, nickname, password, language = 'uk' } = req.body;
 
     console.log('📩 Incoming registration for:', email, nickname);
 
@@ -97,7 +98,7 @@ export const login = async (req: Request, res: Response) => {
     // Короткий токен в httpOnly cookie
    const cookieOpts: CookieOptions = {
       httpOnly: true,
-      maxAge: 15 * 60 * 1000,  // 15 хвилин
+      maxAge: 2 * 60 * 1000 * 60,  // 2 години
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       secure:   process.env.NODE_ENV === 'production'
     };
@@ -131,7 +132,7 @@ export const refreshToken = async (req: Request, res: Response) => {
     const tokens = generateTokens(user);
    const cookieOpts: CookieOptions = {
       httpOnly: true,
-      maxAge: 15 * 60 * 1000,  // 15 хвилин
+      maxAge: 2 * 60 * 1000 * 60,  // 2 години
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       secure:   process.env.NODE_ENV === 'production'
     };
@@ -145,7 +146,8 @@ export const refreshToken = async (req: Request, res: Response) => {
 };
 
 export const me = async (req: AuthRequest, res: Response) => {
-  res.json({ user: req.user });
+  const user = await User.findById(req.user?._id);
+  res.json({ user: user });
 };
 
 
@@ -162,10 +164,9 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
   }
 
   const token = crypto.randomBytes(32).toString('hex');
-  const expire = new Date(Date.now() + 1000 * 60 * 15); // 15 хв
+  const expire = new Date(Date.now() + 1000 * 60 * 60 * 2); // 2 години
 
-  user.resetPasswordToken = token;
-  user.resetPasswordExpires = expire;
+  await ResetToken.deleteMany({ user: user._id });
   await user.save();
   console.log(`📧 Надсилання листа для скидання пароля на ${email}`)  ;
   await sendResetPasswordEmail(email, token);
@@ -179,19 +180,16 @@ export const resetPassword = async (req: Request, res: Response) => {
   if (!token || !newPassword) {
     return res.status(400).json({ message: 'Token and new password are required' });
   }
+  const UserToken = await ResetToken.findOne({ token });
+  const user = await User.findById({ UserToken });
 
-  const user = await User.findOne({
-    resetPasswordToken: token,
-    resetPasswordExpires: { $gt: new Date() }, // перевірка дійсності
-  });
 
   if (!user) {
     return res.status(400).json({ message: 'Invalid or expired token' });
   }
 
   user.password = await bcrypt.hash(newPassword, 10);
-  user.resetPasswordToken = '';
-  user.resetPasswordExpires = new Date();
+  await ResetToken.deleteMany({ user: user._id });
   user.isConfirmed = true;
 
   await user.save();
