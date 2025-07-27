@@ -2,42 +2,56 @@ import { Request, Response, CookieOptions } from 'express';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import User from '../models/User';
-import { sendConfirmationEmail } from '../utils/sendEmail';
+import { sendConfirmationEmail, sendResetPasswordEmail } from '../utils/sendEmail';
 import { generateTokens, verifyRefreshToken } from '../utils/jwt';
 import { AuthRequest } from '../types/AuthRequest';
+import dotenv from 'dotenv';
+dotenv.config();
 
 export const register = async (req: Request, res: Response) => {
   try {
     const { email, nickname, password, language = 'en' } = req.body;
 
+    console.log('📩 Incoming registration for:', email, nickname);
+
     const emailExists = await User.findOne({ email });
-    const nickExists  = await User.findOne({ nickname });
+    const nickExists = await User.findOne({ nickname });
+
     if (emailExists || nickExists) {
-      return res
-        .status(400)
-        .json({ message: emailExists ? 'Email already exists' : 'Nickname already exists' });
+      const message = emailExists
+        ? 'Email already exists'
+        : 'Nickname already exists';
+
+      console.warn('⚠️ Duplicate found:', message);
+      return res.status(400).json({ message });
     }
 
-    const hashedPassword     = await bcrypt.hash(password, 10);
-    const confirmationToken  = crypto.randomBytes(32).toString('hex');
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const confirmationToken = crypto.randomBytes(32).toString('hex');
 
-    await User.create({
+    const newUser = await User.create({
       email,
       nickname,
-      password:         hashedPassword,
+      password: hashedPassword,
       language,
-      languageLevel:    0,
-      rank:             0,
-      knownWords:       [],
+      languageLevel: 0,
+      rank: 0,
+      knownWords: [],
       confirmationToken,
-      isConfirmed:      false
+      isConfirmed: false,
     });
 
+    console.log('✅ User created:', newUser.email);
     await sendConfirmationEmail(email, confirmationToken);
-    res.status(201).json({ message: 'Check your email to confirm registration.' });
-  } catch (err) {
-    console.error('❌ Registration error:', err);
-    res.status(500).json({ message: 'Registration failed.' });
+
+    return res
+      .status(201)
+      .json({ message: 'Check your email to confirm registration.' });
+  } catch (err: any) {
+    console.error('❌ Registration error:', err.message || err);
+    return res.status(500).json({
+      message: 'Registration failed. Please try again later.',
+    });
   }
 };
 
@@ -132,4 +146,55 @@ export const refreshToken = async (req: Request, res: Response) => {
 
 export const me = async (req: AuthRequest, res: Response) => {
   res.json({ user: req.user });
+};
+
+
+export const requestPasswordReset = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  if (!email) return res.status(400).json({ message: 'Email is required' });
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    console.warn(`🔍 Запит на скидання пароля: користувача ${email} не знайдено`);
+    return res.status(200).json({ message: 'If account exists, email was sent' });
+  }
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const expire = new Date(Date.now() + 1000 * 60 * 15); // 15 хв
+
+  user.resetPasswordToken = token;
+  user.resetPasswordExpires = expire;
+  await user.save();
+  console.log(`📧 Надсилання листа для скидання пароля на ${email}`)  ;
+  await sendResetPasswordEmail(email, token);
+
+  return res.status(200).json({ message: 'Reset email sent if account exists' });
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: 'Token and new password are required' });
+  }
+
+  const user = await User.findOne({
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: new Date() }, // перевірка дійсності
+  });
+
+  if (!user) {
+    return res.status(400).json({ message: 'Invalid or expired token' });
+  }
+
+  user.password = await bcrypt.hash(newPassword, 10);
+  user.resetPasswordToken = '';
+  user.resetPasswordExpires = new Date();
+  user.isConfirmed = true;
+
+  await user.save();
+
+  return res.status(200).json({ message: 'Password successfully reset' });
 };

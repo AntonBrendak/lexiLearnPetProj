@@ -12,7 +12,7 @@ interface User {
 interface AuthContextProps {
   user: User | null;
   login: (identifier: string, password: string) => Promise<void>;
-  register: (email: string, nickname: string, password: string) => Promise<void>;
+  register: (email: string, nickname: string, password: string, language: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -47,8 +47,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(meRes.data.user);
   };
 
-  const register = async (email: string, nickname: string, password: string) => {
-    await axios.post('/api/auth/register', { email, nickname, password });
+    const register = async (email: string, nickname: string, password: string, language: string) => {
+    try {
+      await axios.post('/api/auth/register', { email, nickname, password, language });
+      return { success: true };
+    } catch (err: any) {
+      // Extract meaningful message if available
+      const message = err.response?.data?.message || err.message;
+      return { success: false, message };
+    }
   };
 
   const logout = () => {

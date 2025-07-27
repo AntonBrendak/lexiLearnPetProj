@@ -33,6 +33,11 @@ export default function LoginPage() {
       </form>
       <button onClick={handleGoogle} className="mt-4 w-full p-2 bg-red-500 text-white rounded">Login with Google</button>
       <p className="mt-4">Don&apos;t have an account? <a href="/register" className="text-blue-600">Register</a></p>
+      
+      <p className="mt-4">
+        Forgot your password?{' '}
+        <a href="/forgot-password" className="text-blue-600">Reset it here</a>
+      </p>
     </div>
   );
 }

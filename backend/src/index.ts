@@ -12,7 +12,9 @@ import {
   confirmEmail,
   login,
   refreshToken,
-  me
+  me,
+  requestPasswordReset,
+  resetPassword
 } from './controllers/auth.controller';
 import { WordsController } from './controllers/WordsController';
 import { ChatController }  from './controllers/ChatController';
@@ -53,6 +55,8 @@ app.get    ('/api/auth/confirm',  confirmEmail as RequestHandler);
 app.post   ('/api/auth/login',    login as RequestHandler);
 app.post   ('/api/auth/refresh',  refreshToken as RequestHandler);
 app.get    ('/api/auth/me',       authMiddleware, me as RequestHandler);
+app.post   ('/api/auth/reset-password',resetPassword as RequestHandler);
+app.post   ('/api/auth/request-reset', requestPasswordReset as RequestHandler);
 
 // Google OAuth
 app.get    ('/api/auth/google',

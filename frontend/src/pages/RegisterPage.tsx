@@ -9,17 +9,18 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await register(email, nickname, password);
-      alert('Check your email for confirmation link');
-      navigate('/login');
-    } catch (err) {
-      console.error(err);
-      alert('Registration failed');
-    }
-  };
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const result = await register(email, nickname, password, 'ua'); // Assuming 'ua' is the default language
+
+  if (result && result.success) {
+    alert('Check your email for confirmation link');
+    navigate('/login');
+  } else {
+    alert(result?.message || 'Registration failed');
+  }
+};
+
 
   return (
     <div className="max-w-md mx-auto p-4">

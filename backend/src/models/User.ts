@@ -20,6 +20,8 @@ const userSchema = new mongoose.Schema({
   settings: {
     theme: { type: String, default: 'light' },
     notifications: { type: Boolean, default: true }
-  }
+  },
+  resetPasswordToken: { type: String, default: '' },
+  resetPasswordExpires: { type: Date, default: Date.now, expires: 3600 },
 }, { timestamps: true });
 export default mongoose.model('User', userSchema);
