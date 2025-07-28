@@ -1,0 +1,36 @@
+.inputCustom {
+  border: none;
+  border-radius: 1rem !important;
+  background: linear-gradient(93deg, #fafafa 0%, #d6eafa 100%);
+  font-weight: 500;
+  color: #222;
+  font-size: 1.07rem;
+  padding: 0.62rem 1.12rem !important;
+  box-shadow: 0 2px 12px 0 rgba(19, 233, 245, 0.04);
+  transition:
+    box-shadow 0.23s,
+    border-color 0.18s,
+    background 0.18s,
+    color 0.12s;
+  outline: none;
+  z-index: 10;
+}
+
+.inputCustom:focus {
+  background: #a1d4f1;
+  color: #167e87;
+  border: 2px solid #19e9f5;
+  box-shadow: 0 0 0 4px #19e9f533, 0 2px 14px 0 rgba(25,233,245,0.11);
+}
+
+.inputCustom:disabled {
+  background: linear-gradient(93deg, #d1f2fc 0%, #bfdbf1 100%);
+  color: #a2b0b3;
+  opacity: 0.7;
+}
+
+.inputCustom::placeholder {
+  color: #6eaab4;
+  opacity: 1;
+  font-weight: 400;
+}

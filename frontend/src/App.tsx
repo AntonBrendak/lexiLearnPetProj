@@ -1,4 +1,3 @@
-import './index.css';
 import { useContext } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
@@ -19,7 +18,7 @@ import ProtectedRoute from './components/ProtectedRoutes';
 
 export default function App() {
   const { user } = useContext(AuthContext);
-  return (
+  return  (
     <BrowserRouter>
       <Routes>
         {!user ? (

@@ -3,8 +3,8 @@ import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Inputs/Input';
+import { Button } from '../components/ui/Buttons/Button';
 import { Select } from '../components/ui/Select';
 
 const ProfilePage = () => {
